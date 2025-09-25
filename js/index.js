@@ -25,21 +25,53 @@ const API_KEY =
  * This function should execute immediately.
  */
 async function initialLoad() {
-  const response = await fetch('https://api.thecatapi.com/v1/breeds');
-  const breedData = await response.json()
+	const response = await fetch(
+		'https://api.thecatapi.com/v1/breeds/',
+	);
+	const breedData =
+		await response.json();
 
-  console.log(breedData)
+	console.log(breedData);
 
-  breedData.forEach(breed => {
-    const options = document.createElement('option');
-    console.log(options)
-    breedSelect.appendChild(options)
-    options.value = breed.id;
-    options.textContent = breed.name
-  })
+	breedData.forEach((breed) => {
+		const options =
+			document.createElement(
+				'option',
+			);
+		// console.log(options)
+		breedSelect.appendChild(
+			options,
+		);
+		options.value = breed.id;
+		options.textContent =
+			breed.name;
+	});
+	await retrieveInfo();
 }
-initialLoad();
+// using try catch
+// async function initialLoad() {
+//   const url = 'https://api.thecatapi.com/v1/breeds';
+//   try {
+//     const response = await fetch(url);
+//     if (!response.ok) {
+//       throw new Error(`Response status: ${response.status}`);
+//     }
 
+//     const breeds = await response.json();
+
+//     breeds.forEach((breed) => {
+//       const option = document.createElement('option');
+//       option.value = breed.id;
+//       option.textContent = breed.name;
+//       breedSelect.appendChild(option);
+//     });
+
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+
+// }
+initialLoad();
 
 /**
  * 2. Create an event handler for breedSelect that does the following:
@@ -55,8 +87,67 @@ initialLoad();
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
- breedSelect.addEventListener('click', () => {
-} )
+breedSelect.addEventListener(
+	'change',
+	retrieveInfo,
+);
+
+async function retrieveInfo(event) {
+	// On initial load, breedSelect.value if no option is selected.
+	// default to the first option's value if it exists.
+	const breedId = breedSelect.value || breedSelect.options[0]?.value;
+	if (!breedId) return; // Exit if there are no breeds to show
+
+	// Clear previous results
+	clear();
+	infoDump.innerHTML = '';
+
+	try {
+		const response = await fetch(
+			`https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}&limit=10&api_key=${API_KEY}`,
+		);
+		if (!response.ok) {
+			throw new Error(
+				`HTTP error! status: ${response.status}`,
+			);
+		}
+		const data =
+			await response.json();
+
+		if (data.length === 0) {
+			console.warn(`No images found for breed: ${breedId}`);
+			infoDump.textContent = 'No images found for this breed.';
+			return;
+		}
+
+		// Populate carousel
+		for (const imageData of data) {
+			const carouselItem =
+				createCarouselItem( imageData.url, imageData.breeds[0]?.name || 'Cat',imageData.id);
+			appendCarousel( carouselItem );
+		}
+
+		// Populate info dump
+		const breedInfo = data[0].breeds[0];
+		if (breedInfo) {
+      const heading = document.createElement('h2');
+      const originInfo = document.createElement('p');
+      const temperamentInfo = document.createElement('p');
+      
+
+			const paragraph = document.createElement( 'p');
+      heading.textContent = breedInfo.name;
+      originInfo.textContent = `Origin: ${breedInfo.origin}`;
+      temperamentInfo.textContent = `Temperament: ${breedInfo.temperament}`;
+			paragraph.textContent = breedInfo.description;
+			infoDump.append( heading, originInfo, temperamentInfo, paragraph );
+		}
+		start();
+	} catch (error) {
+		console.error( 'Failed to retrieve info:', error );
+		infoDump.textContent = 'Could not load breed information.';
+	}
+}
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."

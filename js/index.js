@@ -87,10 +87,7 @@ initialLoad();
  * - Each new selection should clear, re-populate, and restart the Carousel.
  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
  */
-breedSelect.addEventListener(
-	'change',
-	retrieveInfo,
-);
+breedSelect.addEventListener( 'change', retrieveInfo );
 
 async function retrieveInfo(event) {
 	// On initial load, breedSelect.value if no option is selected.
@@ -103,27 +100,25 @@ async function retrieveInfo(event) {
 	infoDump.innerHTML = '';
 
 	try {
-		const response = await fetch(
-			`https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}&limit=10&api_key=${API_KEY}`,
-		);
+		const response = await fetch(`https://api.thecatapi.com/v1/images/search?breed_ids=${breedId}&limit=10&api_key=${API_KEY}`);
 		if (!response.ok) {
-			throw new Error(
-				`HTTP error! status: ${response.status}`,
-			);
+			throw new Error( `HTTP error! status: ${response.status}` );
 		}
-		const data =
-			await response.json();
+		const data = await response.json();
 
-		if (data.length === 0) {
-			console.warn(`No images found for breed: ${breedId}`);
-			infoDump.textContent = 'No images found for this breed.';
-			return;
-		}
+    if (data.length === 0) {
+		// The console.warn() static method outputs a warning message to the console at the "warning" log level.'mdn' link = https://developer.mozilla.org/en-US/docs/Web/API/console/warn_static
+		console.warn(
+			`No images found for breed: ${breedId}`,
+		);
+		infoDump.textContent =
+			'No images found for this breed.';
+		return;
+	}
 
 		// Populate carousel
 		for (const imageData of data) {
-			const carouselItem =
-				createCarouselItem( imageData.url, imageData.breeds[0]?.name || 'Cat',imageData.id);
+			const carouselItem = createCarouselItem( imageData.url, imageData.breeds[0]?.name || 'Cat',imageData.id);
 			appendCarousel( carouselItem );
 		}
 
@@ -131,11 +126,10 @@ async function retrieveInfo(event) {
 		const breedInfo = data[0].breeds[0];
 		if (breedInfo) {
       const heading = document.createElement('h2');
-      const originInfo = document.createElement('p');
+      const originInfo = document.createElement('h5');
       const temperamentInfo = document.createElement('p');
+      const paragraph = document.createElement('p');
       
-
-			const paragraph = document.createElement( 'p');
       heading.textContent = breedInfo.name;
       originInfo.textContent = `Origin: ${breedInfo.origin}`;
       temperamentInfo.textContent = `Temperament: ${breedInfo.temperament}`;
@@ -151,7 +145,10 @@ async function retrieveInfo(event) {
 
 /**
  * 3. Fork your own sandbox, creating a new one named "JavaScript Axios Lab."
+
  */
+
+
 /**
  * 4. Change all of your fetch() functions to axios!
  * - axios has already been imported for you within index.js.

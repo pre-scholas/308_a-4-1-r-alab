@@ -26,25 +26,18 @@ const API_KEY =
  */
 async function initialLoad() {
 	const response = await fetch(
-		'https://api.thecatapi.com/v1/breeds/',
+		'https://api.thecatapi.com/v2/breeds/',
 	);
-	const breedData =
-		await response.json();
+	const breedData = await response.json();
 
 	console.log(breedData);
 
 	breedData.forEach((breed) => {
-		const options =
-			document.createElement(
-				'option',
-			);
+		const options = document.createElement('option');
 		// console.log(options)
-		breedSelect.appendChild(
-			options,
-		);
+		breedSelect.appendChild( options );
 		options.value = breed.id;
-		options.textContent =
-			breed.name;
+		options.textContent = breed.name;
 	});
 	await retrieveInfo();
 }
